@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class Done extends StatefulWidget {
+  final String id;
   final String endTime;
   final String startTime;
   final String price;
-  Done({Key key, this.startTime, this.endTime, this.price}) : super(key: key);
+  Done({Key key, this.id, this.startTime, this.endTime, this.price})
+      : super(key: key);
 
   @override
   _DoneState createState() => _DoneState();
@@ -26,7 +28,7 @@ class _DoneState extends State<Done> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: QrImage(
-                data: widget.startTime + widget.endTime + widget.price,
+                data: widget.id,
                 version: QrVersions.auto,
                 size: 200,
               ),

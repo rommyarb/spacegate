@@ -6,7 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spacegate/screens/done.dart';
 
 class Checkout extends StatefulWidget {
-  Checkout({Key key}) : super(key: key);
+  final String space;
+  Checkout({Key key, this.space}) : super(key: key);
 
   @override
   _CheckoutState createState() => _CheckoutState();
@@ -46,15 +47,17 @@ class _CheckoutState extends State<Checkout> {
     var username = prefs.getString("username");
 
     Dio().post("https://rommyarb.dev/api/spacegate_bookings", data: {
+      "space": widget.space,
       "username": username,
       "start_time": _startTime,
       "end_time": _endTime,
       "price": _price
     }).then((r) {
-      Navigator.push(
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
               builder: (context) => Done(
+                    id: r.data['insertedId'],
                     endTime: _endTime,
                     startTime: _startTime,
                     price: _price,

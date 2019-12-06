@@ -27,12 +27,34 @@ class _ListRoomState extends State<ListRoom> {
       var data = r.data['data'];
       List<Widget> rooms = [];
       data.forEach((room) {
-        rooms.add(ListTile(
-          leading: Icon(Icons.home),
-          title: Text(room['title']),
-          onTap: () {
-            log("clicked!");
-          },
+        rooms.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Material(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            elevation: 2,
+            color: Colors.blue,
+            child: InkWell(
+              child: ListTile(
+                leading: Icon(
+                  Icons.home,
+                  color: Colors.white,
+                ),
+                title: Text(
+                  room['title'],
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Checkout(
+                              space: room['title'],
+                            )));
+              },
+            ),
+          ),
         ));
       });
       setState(() {
@@ -75,7 +97,7 @@ class _ListRoomState extends State<ListRoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.amberAccent,
+        backgroundColor: Colors.white,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -89,6 +111,7 @@ class _ListRoomState extends State<ListRoom> {
             ),
             Expanded(
               child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: 20),
                 children: _rooms,
               ),
             )
