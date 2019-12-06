@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:pushy_flutter/pushy_flutter.dart';
 import 'package:spacegate/screens/checkout.dart';
 
 class ListRoom extends StatefulWidget {
@@ -9,27 +14,63 @@ class ListRoom extends StatefulWidget {
 }
 
 class _ListRoomState extends State<ListRoom> {
-  Widget _kotak(String title) {
-    return Material(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      elevation: 2,
-      color: Colors.blue,
-      child: InkWell(
-        child: SizedBox(
-          height: 100,
-          width: 100,
-          child: Center(
-              child: Text(
-            title,
-            style: TextStyle(fontSize: 30, color: Colors.white),
-          )),
-        ),
-        onTap: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Checkout()));
-        },
+  List<Map<String, dynamic>> _rooms = [];
+
+  Widget _roomWidgets() {
+    var widgets = [];
+    _rooms.forEach((room) {
+      widgets.add(ListTile(
+        leading: Icon(Icons.home),
+        title: Text(room['title']),
+      ));
+    });
+    return Expanded(
+      child: ListView(
+        children: widgets,
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    Dio().get("https://rommyarb.dev/api/spacegate_rooms").then((r) {
+      log(r.data.toString());
+      var rooms = jsonDecode(r.data);
+      log(rooms.toString());
+    }).catchError((err) {
+      log(err.toString());
+    });
+
+    // Listen for push notifications
+    Pushy.setNotificationListener((Map<String, dynamic> data) {
+      // Print notification payload data
+      print('Received notification: $data');
+
+      // Extract notification messsage
+      String message = data['message'] ?? 'Notifikasi masuk!';
+
+      // Display an alert with the "message" payload value
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+                title: Text('Pushy'),
+                content: Text(message),
+                actions: [
+                  FlatButton(
+                      child: Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop('dialog');
+                      })
+                ]);
+          });
+
+      // Clear iOS app badge number
+      // Pushy.clearBadge();
+    });
   }
 
   @override
@@ -45,26 +86,7 @@ class _ListRoomState extends State<ListRoom> {
             style: TextStyle(fontSize: 16),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              direction: Axis.horizontal,
-              children: <Widget>[
-                _kotak("A"),
-                _kotak("B"),
-                _kotak("C"),
-                _kotak("D"),
-                _kotak("E"),
-                _kotak("F"),
-                _kotak("G"),
-                _kotak("H"),
-              ],
-            ),
-          ),
-        )
+        _roomWidgets()
       ],
     ));
   }

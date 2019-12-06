@@ -1,6 +1,8 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spacegate/screens/done.dart';
 
 class Checkout extends StatefulWidget {
@@ -38,6 +40,29 @@ class _CheckoutState extends State<Checkout> {
   String _startTime = "00:00";
   String _endTime = "00:00";
   String _price = "";
+
+  void _submit() async {
+    var prefs = await SharedPreferences.getInstance();
+    var username = prefs.getString("username");
+
+    Dio().post("https://rommyarb.dev/api/spacegate_bookings", data: {
+      "username": username,
+      "start_time": _startTime,
+      "end_time": _endTime,
+      "price": _price
+    }).then((r) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Done(
+                    endTime: _endTime,
+                    startTime: _startTime,
+                    price: _price,
+                  )));
+    }).catchError((err) {
+      log(err.toString());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,16 +178,7 @@ class _CheckoutState extends State<Checkout> {
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: RaisedButton(
               child: Text("PAY"),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Done(
-                              endTime: _endTime,
-                              startTime: _startTime,
-                              price: _price,
-                            )));
-              },
+              onPressed: _submit,
             ),
           )
         ],

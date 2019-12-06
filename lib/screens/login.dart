@@ -1,4 +1,8 @@
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spacegate/screens/list_room.dart';
 
 class Login extends StatefulWidget {
@@ -9,6 +13,24 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String _username = "";
+
+  void _login() {
+    Dio().post("https://rommyarb.dev/api/spacegate_users",
+        data: {"username": _username}).then((r) async {
+      // save to sharedpref
+      var prefs = await SharedPreferences.getInstance();
+      await prefs.setString("username", _username);
+      await prefs.setBool("loggedIn", true);
+
+      // navigate to ListRoom
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => ListRoom()));
+    }).catchError((err) {
+      log(err.toString());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +51,9 @@ class _LoginState extends State<Login> {
           ),
           TextField(
             decoration: InputDecoration(hintText: "Username"),
+            onChanged: (value) {
+              _username = value;
+            },
           ),
           TextField(
             obscureText: true,
@@ -38,10 +63,7 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: RaisedButton(
               child: Text("Login"),
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ListRoom()));
-              },
+              onPressed: _login,
             ),
           )
         ],
