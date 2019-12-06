@@ -14,31 +14,30 @@ class ListRoom extends StatefulWidget {
 }
 
 class _ListRoomState extends State<ListRoom> {
-  List<Map<String, dynamic>> _rooms = [];
-
-  Widget _roomWidgets() {
-    var widgets = [];
-    _rooms.forEach((room) {
-      widgets.add(ListTile(
-        leading: Icon(Icons.home),
-        title: Text(room['title']),
-      ));
-    });
-    return Expanded(
-      child: ListView(
-        children: widgets,
-      ),
-    );
-  }
+  List<Widget> _rooms = [];
 
   @override
   void initState() {
     super.initState();
 
-    Dio().get("https://rommyarb.dev/api/spacegate_rooms").then((r) {
-      log(r.data.toString());
-      var rooms = jsonDecode(r.data);
-      log(rooms.toString());
+    Dio()
+        .get("https://rommyarb.dev/api/spacegate_rooms",
+            options: Options(responseType: ResponseType.json))
+        .then((r) {
+      var data = r.data['data'];
+      List<Widget> rooms = [];
+      data.forEach((room) {
+        rooms.add(ListTile(
+          leading: Icon(Icons.home),
+          title: Text(room['title']),
+          onTap: () {
+            log("clicked!");
+          },
+        ));
+      });
+      setState(() {
+        _rooms = rooms;
+      });
     }).catchError((err) {
       log(err.toString());
     });
@@ -76,18 +75,24 @@ class _ListRoomState extends State<ListRoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.amberAccent,
         body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Text(
-            "List of coworking space",
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
-        _roomWidgets()
-      ],
-    ));
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 44, left: 20, right: 20, bottom: 20),
+              child: Text(
+                "List of coworking space",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                children: _rooms,
+              ),
+            )
+          ],
+        ));
   }
 }

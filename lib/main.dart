@@ -43,7 +43,7 @@ class _MainState extends State<Main> {
   Widget build(BuildContext context) {
     Future<bool> checkAuth() async {
       var prefs = await SharedPreferences.getInstance();
-      var loggedIn = prefs.getBool("loggedIn");
+      var loggedIn = prefs.getBool("loggedIn") ?? false;
       log("loggedIn: " + loggedIn.toString());
       return loggedIn;
     }

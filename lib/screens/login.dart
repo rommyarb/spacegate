@@ -16,19 +16,36 @@ class _LoginState extends State<Login> {
   String _username = "";
 
   void _login() {
-    Dio().post("https://rommyarb.dev/api/spacegate_users",
-        data: {"username": _username}).then((r) async {
-      // save to sharedpref
-      var prefs = await SharedPreferences.getInstance();
-      await prefs.setString("username", _username);
-      await prefs.setBool("loggedIn", true);
+    if (_username != "") {
+      Dio().post("https://rommyarb.dev/api/spacegate_users",
+          data: {"username": _username}).then((r) async {
+        // save to sharedpref
+        var prefs = await SharedPreferences.getInstance();
+        await prefs.setString("username", _username);
+        await prefs.setBool("loggedIn", true);
 
-      // navigate to ListRoom
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ListRoom()));
-    }).catchError((err) {
-      log(err.toString());
-    });
+        // navigate to ListRoom
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => ListRoom()));
+      }).catchError((err) {
+        log(err.toString());
+      });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: Text("Hmm.."),
+                content: Text("Mohon isi username."),
+                actions: <Widget>[
+                  FlatButton(
+                    child: const Text('OK Sayang'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ));
+    }
   }
 
   @override
